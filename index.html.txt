@@ -1,0 +1,2277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>SmartPark Management System</title>
+
+<style>
+/* =========================
+   RESET
+========================= */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    width: 100%;
+    min-height: 100%;
+}
+
+body {
+    font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #f4f6fb;
+    color: #1a2340;
+}
+
+
+/* =========================
+   APP LAYOUT
+========================= */
+#app {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+}
+
+
+/* =========================
+   SIDEBAR
+========================= */
+.sidebar {
+    width: 230px;
+    min-width: 230px;
+    min-height: 100vh;
+    background: #0b1e3f;
+    color: #cdd6ea;
+
+    display: flex;
+    flex-direction: column;
+
+    position: relative;
+    z-index: 100;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 22px 18px;
+
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.brand-icon {
+    width: 38px;
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 9px;
+
+    font-size: 22px;
+}
+
+.brand-name {
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.brand-sub {
+    color: #8ea0c9;
+    font-size: 11px;
+    margin-top: 2px;
+}
+
+
+/* Navigation */
+.nav {
+    flex: 1;
+
+    padding: 14px 10px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.nav-item {
+    width: 100%;
+
+    background: transparent;
+    border: none;
+
+    color: #b9c3dd;
+
+    text-align: left;
+
+    padding: 11px 14px;
+
+    border-radius: 8px;
+
+    font-family: inherit;
+    font-size: 14px;
+
+    cursor: pointer;
+
+    transition: all 0.15s ease;
+}
+
+.nav-item:hover {
+    background: rgba(255, 255, 255, 0.07);
+    color: #ffffff;
+}
+
+.nav-item.active {
+    background: #2f6fed;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+
+/* Sidebar footer */
+.sidebar-footer {
+    padding: 16px 18px;
+
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sf-title {
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.sf-sub {
+    color: #8ea0c9;
+    font-size: 11px;
+    line-height: 1.4;
+    margin-top: 3px;
+}
+
+
+/* =========================
+   MAIN AREA
+========================= */
+.main {
+    flex: 1;
+    min-width: 0;
+
+    padding: 26px 30px;
+
+    overflow-y: auto;
+}
+
+
+/* =========================
+   TOP BAR
+========================= */
+.topbar {
+    display: flex;
+    align-items: center;
+
+    gap: 14px;
+
+    margin-bottom: 22px;
+}
+
+.topbar h1 {
+    font-size: 22px;
+    line-height: 1.2;
+}
+
+.topbar p {
+    font-size: 13px;
+    color: #8a93a6;
+
+    margin-top: 4px;
+}
+
+
+/* Mobile menu button */
+.menu-toggle {
+    display: none;
+
+    background: #ffffff;
+
+    border: 1px solid #e6e9f2;
+
+    border-radius: 8px;
+
+    font-size: 18px;
+
+    padding: 8px 12px;
+
+    cursor: pointer;
+}
+
+
+/* Admin */
+.admin-chip {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    margin-left: auto;
+}
+
+.avatar {
+    width: 36px;
+    height: 36px;
+
+    border-radius: 50%;
+
+    background: #2f6fed;
+    color: #ffffff;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-weight: 700;
+}
+
+.admin-name {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.admin-role {
+    font-size: 11px;
+    color: #8a93a6;
+}
+
+
+/* =========================
+   CONTENT
+========================= */
+.view-content {
+    display: flex;
+    flex-direction: column;
+
+    gap: 20px;
+
+    width: 100%;
+}
+
+
+/* =========================
+   CARDS
+========================= */
+.card {
+    width: 100%;
+
+    background: #ffffff;
+
+    border-radius: 12px;
+
+    padding: 22px;
+
+    border: 1px solid #e6e9f2;
+
+    box-shadow: 0 1px 3px rgba(20, 30, 60, 0.04);
+}
+
+.card h2 {
+    font-size: 17px;
+    margin-bottom: 4px;
+}
+
+.card .desc {
+    font-size: 13px;
+    color: #8a93a6;
+    margin-bottom: 16px;
+}
+
+
+/* =========================
+   STATISTICS
+========================= */
+.stat-grid {
+    display: grid;
+
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+
+    gap: 16px;
+}
+
+.stat {
+    background: #f8f9fc;
+
+    border-radius: 10px;
+
+    padding: 16px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    min-width: 0;
+}
+
+.stat .icon {
+    width: 40px;
+    height: 40px;
+
+    min-width: 40px;
+
+    border-radius: 8px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 18px;
+}
+
+.stat .label {
+    color: #8a93a6;
+    font-size: 12px;
+
+    margin-bottom: 3px;
+}
+
+.stat .value {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+
+/* =========================
+   TWO COLUMN
+========================= */
+.two-col {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 20px;
+}
+
+
+/* =========================
+   FORM
+========================= */
+.form-grid {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 16px;
+
+    margin-bottom: 16px;
+}
+
+.field label {
+    display: block;
+
+    font-size: 12px;
+
+    color: #8a93a6;
+
+    margin-bottom: 6px;
+}
+
+.field input,
+.field select {
+    width: 100%;
+
+    padding: 10px 12px;
+
+    border: 1px solid #e6e9f2;
+
+    border-radius: 8px;
+
+    font-size: 13px;
+
+    background: #fafbfd;
+
+    font-family: inherit;
+
+    color: #1a2340;
+}
+
+.field input:focus,
+.field select:focus {
+    outline: 2px solid #2f6fed;
+    background: #ffffff;
+}
+
+
+/* =========================
+   BUTTONS
+========================= */
+.btn {
+    background: #2f6fed;
+
+    color: #ffffff;
+
+    border: none;
+
+    padding: 10px 18px;
+
+    border-radius: 8px;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: 0.15s;
+
+    font-family: inherit;
+}
+
+.btn:hover {
+    filter: brightness(1.08);
+}
+
+.btn.secondary {
+    background: #eef1f8;
+    color: #1a2340;
+}
+
+.btn.small {
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
+.btn.danger {
+    background: #fbe6e5;
+    color: #e0463f;
+}
+
+.btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+
+/* =========================
+   TABLE
+========================= */
+.table-wrap {
+    width: 100%;
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+
+    border-collapse: collapse;
+
+    font-size: 13px;
+
+    min-width: 600px;
+}
+
+th {
+    text-align: left;
+
+    color: #8a93a6;
+
+    font-weight: 600;
+
+    font-size: 11px;
+
+    text-transform: uppercase;
+
+    padding: 10px 8px;
+
+    border-bottom: 1px solid #e6e9f2;
+
+    white-space: nowrap;
+}
+
+td {
+    padding: 10px 8px;
+
+    border-bottom: 1px solid #e6e9f2;
+
+    white-space: nowrap;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+.row-actions {
+    display: flex;
+    gap: 6px;
+}
+
+
+/* =========================
+   BADGES
+========================= */
+.badge {
+    display: inline-block;
+
+    padding: 3px 10px;
+
+    border-radius: 20px;
+
+    font-size: 11px;
+
+    font-weight: 600;
+}
+
+.badge.confirmed,
+.badge.active,
+.badge.paid,
+.badge.success {
+    background: #e3f7ea;
+    color: #22a35a;
+}
+
+.badge.pending {
+    background: #fdf1de;
+    color: #f6a623;
+}
+
+.badge.cancelled,
+.badge.inactive {
+    background: #fbe6e5;
+    color: #e0463f;
+}
+
+
+/* =========================
+   PARKING LEGEND
+========================= */
+.legend {
+    display: flex;
+
+    gap: 18px;
+
+    margin-bottom: 14px;
+
+    font-size: 12px;
+
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.legend span {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 6px;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+
+    border-radius: 50%;
+
+    display: inline-block;
+}
+
+.dot.available {
+    background: #22a35a;
+}
+
+.dot.reserved {
+    background: #f6a623;
+}
+
+.dot.occupied {
+    background: #e0463f;
+}
+
+
+/* =========================
+   PARKING SLOTS
+========================= */
+.floor-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1a2340;
+    margin: 4px 0 12px;
+}
+
+.slot-grid {
+    display: grid;
+
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+
+    gap: 10px;
+}
+
+.slot {
+    width: 100%;
+
+    padding: 10px 4px;
+
+    border-radius: 8px;
+
+    text-align: center;
+
+    color: #ffffff;
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: 0.15s;
+
+    border: none;
+
+    font-family: inherit;
+}
+
+.slot:hover {
+    transform: translateY(-2px);
+}
+
+.slot .type {
+    display: block;
+
+    font-size: 10px;
+
+    font-weight: 400;
+
+    opacity: 0.9;
+
+    margin-top: 2px;
+}
+
+.slot.available {
+    background: #22a35a;
+}
+
+.slot.reserved {
+    background: #f6a623;
+}
+
+.slot.occupied {
+    background: #e0463f;
+}
+
+
+/* =========================
+   BAR CHART
+========================= */
+.bar-row {
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    margin-bottom: 10px;
+
+    font-size: 12px;
+}
+
+.bar-label {
+    width: 110px;
+
+    color: #8a93a6;
+
+    flex-shrink: 0;
+}
+
+.bar-track {
+    flex: 1;
+
+    background: #eef1f8;
+
+    border-radius: 6px;
+
+    height: 14px;
+
+    overflow: hidden;
+}
+
+.bar-fill {
+    height: 100%;
+
+    background: #2f6fed;
+
+    border-radius: 6px;
+}
+
+.bar-value {
+    width: 60px;
+
+    text-align: right;
+
+    font-weight: 600;
+
+    flex-shrink: 0;
+}
+
+
+/* =========================
+   LOG
+========================= */
+.log-list {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 8px;
+
+    max-height: 260px;
+
+    overflow-y: auto;
+}
+
+.log-item {
+    font-size: 12px;
+
+    padding: 8px 10px;
+
+    background: #f8f9fc;
+
+    border-radius: 6px;
+}
+
+.log-item .time {
+    color: #8a93a6;
+
+    font-size: 11px;
+
+    margin-right: 6px;
+}
+
+
+/* =========================
+   TOAST
+========================= */
+.toast {
+    position: fixed;
+
+    bottom: 24px;
+    right: 24px;
+
+    background: #0b1e3f;
+
+    color: #ffffff;
+
+    padding: 12px 18px;
+
+    border-radius: 8px;
+
+    font-size: 13px;
+
+    opacity: 0;
+
+    transform: translateY(10px);
+
+    transition: 0.25s;
+
+    pointer-events: none;
+
+    z-index: 999;
+
+    max-width: 320px;
+}
+
+.toast.show {
+    opacity: 1;
+
+    transform: translateY(0);
+}
+
+
+/* =========================
+   MOBILE OVERLAY
+========================= */
+.sidebar-overlay {
+    display: none;
+
+    position: fixed;
+
+    inset: 0;
+
+    background: rgba(0, 0, 0, 0.35);
+
+    z-index: 90;
+}
+
+.sidebar-overlay.show {
+    display: block;
+}
+
+
+/* =========================
+   RESPONSIVE - 1100px
+========================= */
+@media (max-width: 1100px) {
+
+    .stat-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .slot-grid {
+        grid-template-columns: repeat(8, 1fr);
+    }
+}
+
+
+/* =========================
+   RESPONSIVE - 900px
+========================= */
+@media (max-width: 900px) {
+
+    .form-grid,
+    .two-col {
+        grid-template-columns: 1fr;
+    }
+
+    .slot-grid {
+        grid-template-columns: repeat(5, 1fr);
+    }
+
+    .main {
+        padding: 22px;
+    }
+}
+
+
+/* =========================
+   RESPONSIVE - 768px
+========================= */
+@media (max-width: 768px) {
+
+    .sidebar {
+        position: fixed;
+
+        left: -240px;
+
+        top: 0;
+        bottom: 0;
+
+        width: 230px;
+        min-width: 230px;
+
+        transition: left 0.2s ease;
+
+        box-shadow: none;
+    }
+
+    .sidebar.open {
+        left: 0;
+
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .menu-toggle {
+        display: inline-flex;
+
+        align-items: center;
+        justify-content: center;
+    }
+
+    .main {
+        width: 100%;
+
+        padding: 18px;
+    }
+
+    .topbar {
+        flex-wrap: wrap;
+    }
+
+    .admin-chip {
+        margin-left: auto;
+    }
+}
+
+
+/* =========================
+   RESPONSIVE - 480px
+========================= */
+@media (max-width: 480px) {
+
+    .main {
+        padding: 14px;
+    }
+
+    .topbar h1 {
+        font-size: 19px;
+    }
+
+    .topbar p {
+        font-size: 12px;
+    }
+
+    .admin-name,
+    .admin-role {
+        display: none;
+    }
+
+    .stat-grid {
+        grid-template-columns: 1fr 1fr;
+
+        gap: 10px;
+    }
+
+    .stat {
+        padding: 12px;
+
+        gap: 8px;
+    }
+
+    .stat .icon {
+        width: 34px;
+        height: 34px;
+        min-width: 34px;
+    }
+
+    .stat .value {
+        font-size: 18px;
+    }
+
+    .slot-grid {
+        grid-template-columns: repeat(4, 1fr);
+
+        gap: 8px;
+    }
+
+    .card {
+        padding: 16px;
+    }
+}
+</style>
+</head>
+
+
+<body>
+
+<div id="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+
+        <div class="brand">
+            <div class="brand-icon">🚗</div>
+
+            <div>
+                <div class="brand-name">SmartPark</div>
+                <div class="brand-sub">Management System</div>
+            </div>
+        </div>
+
+
+        <nav class="nav">
+
+            <button class="nav-item active" data-view="dashboard">
+                📊 Dashboard
+            </button>
+
+            <button class="nav-item" data-view="users">
+                👤 Users
+            </button>
+
+            <button class="nav-item" data-view="slots">
+                🅿️ Parking Slots
+            </button>
+
+            <button class="nav-item" data-view="bookings">
+                📅 Bookings
+            </button>
+
+            <button class="nav-item" data-view="payments">
+                💳 Payments
+            </button>
+
+            <button class="nav-item" data-view="analytics">
+                📈 Analytics
+            </button>
+
+            <button class="nav-item" data-view="admin">
+                ⚙️ Admin
+            </button>
+
+        </nav>
+
+
+        <div class="sidebar-footer">
+
+            <div class="sf-title">
+                Smart Parking
+            </div>
+
+            <div class="sf-sub">
+                Dynamic Slot Allocation &amp; Revenue Analytics
+            </div>
+
+        </div>
+
+    </aside>
+
+
+    <!-- MOBILE OVERLAY -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+
+    <!-- MAIN -->
+    <main class="main">
+
+        <header class="topbar">
+
+            <button
+                class="menu-toggle"
+                id="menuToggle"
+                aria-label="Toggle menu">
+                ☰
+            </button>
+
+            <div>
+
+                <h1 id="pageTitle">
+                    Dashboard
+                </h1>
+
+                <p id="pageSub">
+                    Welcome to Smart Parking Management System
+                </p>
+
+            </div>
+
+
+            <div class="admin-chip">
+
+                <div class="avatar">
+                    A
+                </div>
+
+                <div>
+
+                    <div class="admin-name">
+                        Administrator
+                    </div>
+
+                    <div class="admin-role">
+                        System Admin
+                    </div>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- DYNAMIC CONTENT -->
+        <section
+            id="viewContent"
+            class="view-content">
+        </section>
+
+    </main>
+
+</div>
+
+
+<!-- TOAST -->
+<div id="toast" class="toast"></div>
+
+
+<script>
+
+/* =====================================
+   PAGE DATA
+===================================== */
+
+const pageInfo = {
+
+    dashboard: {
+        title: "Dashboard",
+        sub: "Welcome to Smart Parking Management System"
+    },
+
+    users: {
+        title: "Users",
+        sub: "Register and manage parking users"
+    },
+
+    slots: {
+        title: "Parking Slots",
+        sub: "Real-time parking slot availability"
+    },
+
+    bookings: {
+        title: "Bookings",
+        sub: "Reserve your parking slot"
+    },
+
+    payments: {
+        title: "Payments",
+        sub: "Monitor parking payments and transactions"
+    },
+
+    analytics: {
+        title: "Analytics",
+        sub: "View parking and revenue analytics"
+    },
+
+    admin: {
+        title: "Admin",
+        sub: "Monitor the complete smart parking system"
+    }
+
+};
+
+
+/* =====================================
+   APPLICATION STATE
+===================================== */
+
+const SLOT_TYPES = ["Car", "Car", "Car", "Bike", "EV", "Car", "Bike", "Car", "EV", "Car"];
+
+let nextUserId = 1002;
+let nextBookingId = 5002;
+
+const state = {
+
+    users: [
+        { id: 1001, name: "ROHIT KUMAR S", phone: "9345343669", email: "snvr2009@gmail.com", status: "Active" }
+    ],
+
+    slots: buildInitialSlots(),
+
+    bookings: [
+        {
+            id: 5001,
+            user: "ROHIT KUMAR S",
+            vehicle: "TN05AH4277",
+            vehicleType: "Car",
+            slot: "Slot 1",
+            date: "2026-08-23",
+            time: "21:11 - 22:15",
+            status: "Confirmed"
+        }
+    ],
+
+    payments: [
+        {
+            bookingId: 5001,
+            method: "UPI",
+            amount: 120,
+            time: "10:15 AM"
+        }
+    ],
+
+    activity: [
+        { time: "10:45 AM", text: "Vehicle parked in Slot A12" },
+        { time: "10:32 AM", text: "Booking confirmed for B08" },
+        { time: "10:15 AM", text: "Payment received ₹120" },
+        { time: "09:58 AM", text: "Vehicle exited Slot C05" },
+        { time: "09:42 AM", text: "New user registered" }
+    ]
+
+};
+
+
+function buildInitialSlots() {
+
+    const slots = [];
+
+    for (let i = 1; i <= 50; i++) {
+
+        let status = "available";
+
+        // Slot 1 starts reserved, matching Recent Bookings above
+        if (i === 1) status = "reserved";
+
+        slots.push({
+            number: i,
+            label: "Slot " + i,
+            type: SLOT_TYPES[(i - 1) % SLOT_TYPES.length],
+            status: status
+        });
+
+    }
+
+    return slots;
+
+}
+
+
+function logActivity(text) {
+
+    const now = new Date();
+
+    let hours = now.getHours();
+    const minutes = now.getMinutes().toString().padStart(2, "0");
+    const suffix = hours >= 12 ? "PM" : "AM";
+
+    hours = hours % 12;
+    if (hours === 0) hours = 12;
+
+    state.activity.unshift({
+        time: hours + ":" + minutes + " " + suffix,
+        text: text
+    });
+
+    if (state.activity.length > 12) {
+        state.activity.pop();
+    }
+
+}
+
+
+function totalRevenue() {
+
+    return state.payments.reduce((sum, p) => sum + p.amount, 0);
+
+}
+
+
+/* =====================================
+   ELEMENTS
+===================================== */
+
+const viewContent =
+    document.getElementById("viewContent");
+
+const pageTitle =
+    document.getElementById("pageTitle");
+
+const pageSub =
+    document.getElementById("pageSub");
+
+const sidebar =
+    document.getElementById("sidebar");
+
+const menuToggle =
+    document.getElementById("menuToggle");
+
+const sidebarOverlay =
+    document.getElementById("sidebarOverlay");
+
+const toast =
+    document.getElementById("toast");
+
+let currentView = "dashboard";
+
+
+/* =====================================
+   DASHBOARD
+===================================== */
+
+function showDashboard() {
+
+    const available = state.slots.filter(s => s.status === "available").length;
+    const reserved = state.slots.filter(s => s.status === "reserved").length;
+    const occupied = state.slots.filter(s => s.status === "occupied").length;
+
+    viewContent.innerHTML = `
+
+        <div class="stat-grid">
+
+            <div class="stat">
+                <div class="icon" style="background:#e7efff;">🚗</div>
+                <div>
+                    <div class="label">Total Slots</div>
+                    <div class="value">${state.slots.length}</div>
+                </div>
+            </div>
+
+            <div class="stat">
+                <div class="icon" style="background:#e3f7ea;">✓</div>
+                <div>
+                    <div class="label">Available</div>
+                    <div class="value">${available}</div>
+                </div>
+            </div>
+
+            <div class="stat">
+                <div class="icon" style="background:#fdf1de;">📅</div>
+                <div>
+                    <div class="label">Reserved</div>
+                    <div class="value">${reserved}</div>
+                </div>
+            </div>
+
+            <div class="stat">
+                <div class="icon" style="background:#fbe6e5;">🚘</div>
+                <div>
+                    <div class="label">Occupied</div>
+                    <div class="value">${occupied}</div>
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="two-col">
+
+            <div class="card">
+
+                <h2>Parking Status</h2>
+                <p class="desc">Current parking slot availability</p>
+
+                <div class="legend">
+                    <span><span class="dot available"></span>Available</span>
+                    <span><span class="dot reserved"></span>Reserved</span>
+                    <span><span class="dot occupied"></span>Occupied</span>
+                </div>
+
+                <div class="slot-grid">
+                    ${renderSlots(state.slots.slice(0, 40))}
+                </div>
+
+            </div>
+
+            <div class="card">
+
+                <h2>Recent Activity</h2>
+                <p class="desc">Latest parking activities</p>
+
+                <div class="log-list">
+                    ${state.activity.map(a => `
+                        <div class="log-item">
+                            <span class="time">${a.time}</span>${a.text}
+                        </div>
+                    `).join("")}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <h2>Revenue Overview</h2>
+            <p class="desc">Today's parking revenue by time</p>
+
+            ${renderRevenueBars()}
+
+        </div>
+
+    `;
+
+}
+
+
+function renderRevenueBars() {
+
+    const slots = [
+        { label: "08:00 AM", value: 1200 },
+        { label: "10:00 AM", value: 2100 },
+        { label: "12:00 PM", value: 3400 },
+        { label: "02:00 PM", value: 2700 + totalRevenue() }
+    ];
+
+    const max = Math.max(...slots.map(s => s.value));
+
+    return slots.map(s => `
+        <div class="bar-row">
+            <div class="bar-label">${s.label}</div>
+            <div class="bar-track">
+                <div class="bar-fill" style="width:${Math.round((s.value / max) * 100)}%;"></div>
+            </div>
+            <div class="bar-value">₹${s.value.toLocaleString("en-IN")}</div>
+        </div>
+    `).join("");
+
+}
+
+
+/* =====================================
+   RENDER SLOTS (shared)
+===================================== */
+
+function renderSlots(slots) {
+
+    let html = "";
+
+    slots.forEach(s => {
+
+        html += `
+            <button class="slot ${s.status}" onclick="slotClicked(${s.number})">
+                A${String(s.number).padStart(2, "0")}
+                <span class="type">${s.status}</span>
+            </button>
+        `;
+
+    });
+
+    return html;
+
+}
+
+
+/* =====================================
+   USERS
+===================================== */
+
+function showUsers() {
+
+    viewContent.innerHTML = `
+
+        <div class="card">
+
+            <h2>User Management</h2>
+            <p class="desc">Register and manage parking users.</p>
+
+            <div class="form-grid">
+
+                <div class="field">
+                    <label>Full Name</label>
+                    <input type="text" id="userName" placeholder="Enter full name">
+                </div>
+
+                <div class="field">
+                    <label>Phone Number</label>
+                    <input type="text" id="userPhone" placeholder="Enter phone number">
+                </div>
+
+                <div class="field">
+                    <label>Email</label>
+                    <input type="email" id="userEmail" placeholder="Enter email">
+                </div>
+
+                <div class="field">
+                    <label>Password</label>
+                    <input type="password" id="userPassword" placeholder="Create password">
+                </div>
+
+            </div>
+
+            <button class="btn" onclick="registerUser()">Register User</button>
+
+        </div>
+
+
+        <div class="card">
+
+            <h2>Registered Users</h2>
+
+            <div class="table-wrap">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>User ID</th>
+                            <th>Name</th>
+                            <th>Phone</th>
+                            <th>Email</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        ${state.users.map(u => `
+                            <tr>
+                                <td>${u.id}</td>
+                                <td>${u.name}</td>
+                                <td>${u.phone}</td>
+                                <td>${u.email}</td>
+                                <td><span class="badge ${u.status === "Active" ? "active" : "inactive"}">${u.status}</span></td>
+                                <td>
+                                    <div class="row-actions">
+                                        <button class="btn small secondary" onclick="toggleUserStatus(${u.id})">
+                                            ${u.status === "Active" ? "Deactivate" : "Activate"}
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `).join("")}
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+function registerUser() {
+
+    const name = document.getElementById("userName").value.trim();
+    const phone = document.getElementById("userPhone").value.trim();
+    const email = document.getElementById("userEmail").value.trim();
+    const password = document.getElementById("userPassword").value;
+
+    if (!name || !phone || !email || !password) {
+        showToast("Please fill in all fields");
+        return;
+    }
+
+    state.users.push({
+        id: nextUserId++,
+        name: name.toUpperCase(),
+        phone: phone,
+        email: email,
+        status: "Active"
+    });
+
+    logActivity("New user registered: " + name);
+
+    showToast("User \"" + name + "\" registered");
+
+    showUsers();
+
+}
+
+
+function toggleUserStatus(id) {
+
+    const user = state.users.find(u => u.id === id);
+
+    if (!user) return;
+
+    user.status = user.status === "Active" ? "Inactive" : "Active";
+
+    showToast("User " + user.name + " is now " + user.status);
+
+    showUsers();
+
+}
+
+
+/* =====================================
+   PARKING SLOTS
+===================================== */
+
+function showSlots() {
+
+    const available = state.slots.filter(s => s.status === "available").length;
+    const reserved = state.slots.filter(s => s.status === "reserved").length;
+    const occupied = state.slots.filter(s => s.status === "occupied").length;
+
+    viewContent.innerHTML = `
+
+        <div class="card">
+
+            <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap;">
+                <div>
+                    <h2>Parking Slot Management</h2>
+                    <p class="desc">Real-time parking slot availability.</p>
+                </div>
+                <button class="btn small secondary" onclick="refreshSlots()">↻ Refresh</button>
+            </div>
+
+            <div class="legend">
+                <span><span class="dot available"></span>Available (${available})</span>
+                <span><span class="dot reserved"></span>Reserved (${reserved})</span>
+                <span><span class="dot occupied"></span>Occupied (${occupied})</span>
+            </div>
+
+            <div class="floor-label">Ground Floor</div>
+
+            <div class="slot-grid">
+                ${renderSlots(state.slots)}
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+function refreshSlots() {
+
+    showToast("Slot availability refreshed");
+
+    showSlots();
+
+}
+
+
+function slotClicked(number) {
+
+    const slot = state.slots.find(s => s.number === number);
+
+    if (!slot) return;
+
+    if (currentView !== "slots" && currentView !== "dashboard") return;
+
+    // cycle status: available -> occupied -> reserved -> available
+    const order = ["available", "occupied", "reserved"];
+    const next = order[(order.indexOf(slot.status) + 1) % order.length];
+
+    slot.status = next;
+
+    logActivity("Slot A" + String(number).padStart(2, "0") + " marked " + next);
+
+    showToast("Slot A" + String(number).padStart(2, "0") + " is now " + next);
+
+    if (currentView === "slots") {
+        showSlots();
+    } else {
+        showDashboard();
+    }
+
+}
+
+
+/* =====================================
+   BOOKINGS
+===================================== */
+
+function showBookings() {
+
+    const userOptions = state.users
+        .filter(u => u.status === "Active")
+        .map(u => `<option value="${u.name}">${u.name}</option>`)
+        .join("");
+
+    viewContent.innerHTML = `
+
+        <div class="card">
+
+            <h2>Booking &amp; Reservation</h2>
+            <p class="desc">Reserve your parking slot.</p>
+
+            <div class="form-grid">
+
+                <div class="field">
+                    <label>User</label>
+                    <select id="bkUser">
+                        <option value="">Select User</option>
+                        ${userOptions}
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>Vehicle Number</label>
+                    <input type="text" id="bkVehicle" placeholder="TN01AB1234">
+                </div>
+
+                <div class="field">
+                    <label>Vehicle Type</label>
+                    <select id="bkType">
+                        <option value="Car">Car</option>
+                        <option value="Bike">Bike</option>
+                        <option value="EV">EV</option>
+                        <option value="Truck">Truck</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>Date</label>
+                    <input type="date" id="bkDate">
+                </div>
+
+                <div class="field">
+                    <label>Start Time</label>
+                    <input type="time" id="bkStart">
+                </div>
+
+                <div class="field">
+                    <label>End Time</label>
+                    <input type="time" id="bkEnd">
+                </div>
+
+            </div>
+
+            <button class="btn" onclick="createBooking()">Find &amp; Reserve Best Slot</button>
+
+        </div>
+
+
+        <div class="card">
+
+            <h2>Recent Bookings</h2>
+
+            <div class="table-wrap">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Booking ID</th>
+                            <th>User</th>
+                            <th>Vehicle</th>
+                            <th>Slot</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        ${state.bookings.slice().reverse().map(b => `
+                            <tr>
+                                <td>${b.id}</td>
+                                <td>${b.user}</td>
+                                <td>${b.vehicle}</td>
+                                <td>${b.slot}</td>
+                                <td>${b.date}</td>
+                                <td>${b.time}</td>
+                                <td><span class="badge ${badgeClass(b.status)}">${b.status}</span></td>
+                                <td>
+                                    ${b.status === "Confirmed" ? `<button class="btn small danger" onclick="cancelBooking(${b.id})">Cancel</button>` : ""}
+                                </td>
+                            </tr>
+                        `).join("")}
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+function badgeClass(status) {
+
+    if (status === "Confirmed") return "confirmed";
+    if (status === "Pending") return "pending";
+    if (status === "Cancelled") return "cancelled";
+    return "pending";
+
+}
+
+
+function createBooking() {
+
+    const user = document.getElementById("bkUser").value;
+    const vehicle = document.getElementById("bkVehicle").value.trim().toUpperCase();
+    const type = document.getElementById("bkType").value;
+    const date = document.getElementById("bkDate").value;
+    const start = document.getElementById("bkStart").value;
+    const end = document.getElementById("bkEnd").value;
+
+    if (!user || !vehicle || !date || !start || !end) {
+        showToast("Please fill in all booking fields");
+        return;
+    }
+
+    const bestSlot = state.slots.find(s => s.status === "available" && s.type === type)
+        || state.slots.find(s => s.status === "available");
+
+    if (!bestSlot) {
+        showToast("No available slots right now");
+        return;
+    }
+
+    bestSlot.status = "reserved";
+
+    const booking = {
+        id: nextBookingId++,
+        user: user,
+        vehicle: vehicle,
+        vehicleType: type,
+        slot: bestSlot.label,
+        date: date,
+        time: start + " - " + end,
+        status: "Confirmed"
+    };
+
+    state.bookings.push(booking);
+
+    logActivity("Booking confirmed for " + bestSlot.label);
+
+    showToast("Best slot found: " + bestSlot.label + " reserved for " + vehicle);
+
+    showBookings();
+
+}
+
+
+function cancelBooking(id) {
+
+    const booking = state.bookings.find(b => b.id === id);
+
+    if (!booking) return;
+
+    booking.status = "Cancelled";
+
+    const slot = state.slots.find(s => s.label === booking.slot);
+
+    if (slot && slot.status === "reserved") {
+        slot.status = "available";
+    }
+
+    logActivity("Booking " + id + " cancelled");
+
+    showToast("Booking " + id + " cancelled");
+
+    showBookings();
+
+}
+
+
+/* =====================================
+   PAYMENTS
+===================================== */
+
+function showPayments() {
+
+    viewContent.innerHTML = `
+
+        <div class="card">
+
+            <h2>Payment &amp; Revenue</h2>
+
+            <div class="form-grid" style="margin-bottom:22px;">
+
+                <div class="field">
+                    <label>Total Revenue</label>
+                    <div style="font-size:20px; font-weight:700;">₹${totalRevenue().toLocaleString("en-IN")}</div>
+                </div>
+
+                <div class="field">
+                    <label>Transactions</label>
+                    <div style="font-size:20px; font-weight:700;">${state.payments.length}</div>
+                </div>
+
+            </div>
+
+            <div class="form-grid">
+
+                <div class="field">
+                    <label>Booking ID</label>
+                    <input type="text" id="payBookingId" placeholder="Booking ID">
+                </div>
+
+                <div class="field">
+                    <label>Payment Method</label>
+                    <select id="payMethod">
+                        <option value="UPI">UPI</option>
+                        <option value="Card">Card</option>
+                        <option value="Cash">Cash</option>
+                        <option value="Wallet">Wallet</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <button class="btn" onclick="processPayment()">Pay Now</button>
+
+        </div>
+
+
+        <div class="card">
+
+            <h2>Transaction History</h2>
+
+            <div class="table-wrap">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Booking ID</th>
+                            <th>Method</th>
+                            <th>Amount</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        ${state.payments.slice().reverse().map(p => `
+                            <tr>
+                                <td>${p.bookingId}</td>
+                                <td>${p.method}</td>
+                                <td>₹${p.amount}</td>
+                                <td>${p.time}</td>
+                                <td><span class="badge paid">Paid</span></td>
+                            </tr>
+                        `).join("")}
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+function processPayment() {
+
+    const bookingIdRaw = document.getElementById("payBookingId").value.trim();
+    const method = document.getElementById("payMethod").value;
+
+    if (!bookingIdRaw) {
+        showToast("Please enter a Booking ID");
+        return;
+    }
+
+    const bookingId = parseInt(bookingIdRaw, 10);
+
+    const booking = state.bookings.find(b => b.id === bookingId);
+
+    if (!booking) {
+        showToast("Booking ID not found");
+        return;
+    }
+
+    const rateByType = { Car: 60, Bike: 30, EV: 90, Truck: 120 };
+    const amount = rateByType[booking.vehicleType] || 60;
+
+    const now = new Date();
+    let hours = now.getHours();
+    const minutes = now.getMinutes().toString().padStart(2, "0");
+    const suffix = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12;
+    if (hours === 0) hours = 12;
+
+    state.payments.push({
+        bookingId: bookingId,
+        method: method,
+        amount: amount,
+        time: hours + ":" + minutes + " " + suffix
+    });
+
+    logActivity("Payment received ₹" + amount + " for Booking " + bookingId);
+
+    showToast("Payment of ₹" + amount + " received via " + method);
+
+    showPayments();
+
+}
+
+
+/* =====================================
+   ANALYTICS
+===================================== */
+
+function showAnalytics() {
+
+    const carCount = state.slots.filter(s => s.type === "Car").length;
+    const bikeCount = state.slots.filter(s => s.type === "Bike").length;
+    const evCount = state.slots.filter(s => s.type === "EV").length;
+    const totalTypes = carCount + bikeCount + evCount;
+
+    const methodTotals = {};
+
+    state.payments.forEach(p => {
+        methodTotals[p.method] = (methodTotals[p.method] || 0) + p.amount;
+    });
+
+    const methodEntries = Object.keys(methodTotals).length
+        ? Object.entries(methodTotals)
+        : [["UPI", 0]];
+
+    const maxMethod = Math.max(...methodEntries.map(e => e[1]), 1);
+    const maxType = Math.max(carCount, bikeCount, evCount, 1);
+
+    viewContent.innerHTML = `
+
+        <div class="stat-grid">
+
+            <div class="stat">
+                <div class="icon" style="background:#e7efff;">💰</div>
+                <div>
+                    <div class="label">Total Revenue</div>
+                    <div class="value">₹${totalRevenue().toLocaleString("en-IN")}</div>
+                </div>
+            </div>
+
+            <div class="stat">
+                <div class="icon" style="background:#e3f7ea;">📅</div>
+                <div>
+                    <div class="label">Total Bookings</div>
+                    <div class="value">${state.bookings.length}</div>
+                </div>
+            </div>
+
+            <div class="stat">
+                <div class="icon" style="background:#fdf1de;">👥</div>
+                <div>
+                    <div class="label">Active Users</div>
+                    <div class="value">${state.users.filter(u => u.status === "Active").length}</div>
+                </div>
+            </div>
+
+            <div class="stat">
+                <div class="icon" style="background:#fbe6e5;">🅿️</div>
+                <div>
+                    <div class="label">Occupancy Rate</div>
+                    <div class="value">${Math.round((state.slots.filter(s => s.status !== "available").length / state.slots.length) * 100)}%</div>
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="two-col">
+
+            <div class="card">
+
+                <h2>Slot Type Distribution</h2>
+                <p class="desc">Slots by vehicle type</p>
+
+                <div class="bar-row">
+                    <div class="bar-label">Car</div>
+                    <div class="bar-track"><div class="bar-fill" style="width:${Math.round((carCount / maxType) * 100)}%;"></div></div>
+                    <div class="bar-value">${carCount}</div>
+                </div>
+
+                <div class="bar-row">
+                    <div class="bar-label">Bike</div>
+                    <div class="bar-track"><div class="bar-fill" style="width:${Math.round((bikeCount / maxType) * 100)}%;"></div></div>
+                    <div class="bar-value">${bikeCount}</div>
+                </div>
+
+                <div class="bar-row">
+                    <div class="bar-label">EV</div>
+                    <div class="bar-track"><div class="bar-fill" style="width:${Math.round((evCount / maxType) * 100)}%;"></div></div>
+                    <div class="bar-value">${evCount}</div>
+                </div>
+
+            </div>
+
+            <div class="card">
+
+                <h2>Payment Method Split</h2>
+                <p class="desc">Revenue by payment method</p>
+
+                ${methodEntries.map(([method, amount]) => `
+                    <div class="bar-row">
+                        <div class="bar-label">${method}</div>
+                        <div class="bar-track"><div class="bar-fill" style="width:${Math.round((amount / maxMethod) * 100)}%;"></div></div>
+                        <div class="bar-value">₹${amount}</div>
+                    </div>
+                `).join("")}
+
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <h2>Revenue Trend</h2>
+            <p class="desc">Today's parking revenue by time</p>
+
+            ${renderRevenueBars()}
+
+        </div>
+
+    `;
+
+}
+
+
+/* =====================================
+   ADMIN
+===================================== */
+
+function showAdmin() {
+
+    viewContent.innerHTML = `
+
+        <div class="card">
+
+            <h2>Admin &amp; Monitoring</h2>
+            <p class="desc">Monitor the complete smart parking system.</p>
+
+            <div class="stat-grid">
+
+                <div class="stat">
+                    <div class="icon" style="background:#e7efff;">👥</div>
+                    <div>
+                        <div class="label">Users</div>
+                        <div class="value">${state.users.length}</div>
+                    </div>
+                </div>
+
+                <div class="stat">
+                    <div class="icon" style="background:#e3f7ea;">P</div>
+                    <div>
+                        <div class="label">Parking Slots</div>
+                        <div class="value">${state.slots.length}</div>
+                    </div>
+                </div>
+
+                <div class="stat">
+                    <div class="icon" style="background:#fdf1de;">🧮</div>
+                    <div>
+                        <div class="label">Bookings</div>
+                        <div class="value">${state.bookings.length}</div>
+                    </div>
+                </div>
+
+                <div class="stat">
+                    <div class="icon" style="background:#fbe6e5;">💰</div>
+                    <div>
+                        <div class="label">Revenue</div>
+                        <div class="value">₹${totalRevenue().toLocaleString("en-IN")}</div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <h2>System Activity Log</h2>
+            <p class="desc">Audit trail of recent actions</p>
+
+            <div class="log-list">
+                ${state.activity.map(a => `
+                    <div class="log-item">
+                        <span class="time">${a.time}</span>${a.text}
+                    </div>
+                `).join("")}
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+/* =====================================
+   PAGE ROUTER
+===================================== */
+
+function showPage(view) {
+
+    currentView = view;
+
+    if (view === "dashboard") return showDashboard();
+    if (view === "users") return showUsers();
+    if (view === "slots") return showSlots();
+    if (view === "bookings") return showBookings();
+    if (view === "payments") return showPayments();
+    if (view === "analytics") return showAnalytics();
+    if (view === "admin") return showAdmin();
+
+}
+
+
+/* =====================================
+   NAVIGATION
+===================================== */
+
+document.querySelectorAll(".nav-item")
+.forEach(button => {
+
+    button.addEventListener("click", () => {
+
+        const view =
+            button.getAttribute("data-view");
+
+
+        /* Active button */
+
+        document
+            .querySelectorAll(".nav-item")
+            .forEach(item => {
+
+                item.classList.remove("active");
+
+            });
+
+        button.classList.add("active");
+
+
+        /* Change title */
+
+        pageTitle.textContent =
+            pageInfo[view].title;
+
+        pageSub.textContent =
+            pageInfo[view].sub;
+
+
+        /* Load page */
+
+        showPage(view);
+
+
+        /* Close mobile sidebar */
+
+        sidebar.classList.remove("open");
+
+        sidebarOverlay.classList.remove("show");
+
+    });
+
+});
+
+
+/* =====================================
+   MOBILE MENU
+===================================== */
+
+menuToggle.addEventListener("click", () => {
+
+    sidebar.classList.toggle("open");
+
+    sidebarOverlay.classList.toggle("show");
+
+});
+
+
+sidebarOverlay.addEventListener("click", () => {
+
+    sidebar.classList.remove("open");
+
+    sidebarOverlay.classList.remove("show");
+
+});
+
+
+/* =====================================
+   TOAST
+===================================== */
+
+let toastTimer;
+
+function showToast(message) {
+
+    toast.textContent = message;
+
+    toast.classList.add("show");
+
+
+    clearTimeout(toastTimer);
+
+    toastTimer = setTimeout(() => {
+
+        toast.classList.remove("show");
+
+    }, 2500);
+
+}
+
+
+/* =====================================
+   INITIAL PAGE
+===================================== */
+
+showDashboard();
+
+</script>
+
+</body>
+</html>

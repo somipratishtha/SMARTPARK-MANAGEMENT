@@ -1,0 +1,266 @@
+const RATE = { Car: 40, Bike: 20, EV: 50, Truck: 60, VIP: 100 };
+const VEHICLE_TYPES = ["Car", "Bike", "EV", "Truck", "VIP"];
+
+let state = load() || {
+  users: [{ id: 1001, name: "ROHIT KUMAR S", phone: "9345343669", email: "srv2009@gmail.com", status: "Active" }],
+  slots: makeSlots(),
+  bookings: [{ id: 5001, userId: 1001, userName: "ROHIT KUMAR S", vehicle: "TN05AH4277", type: "Car",
+    date: "2026-08-23", start: "21:11", end: "22:15", slotId: 1, status: "Confirmed", paid: false }],
+  payments: [{ id: 9001, bookingId: 5001, amount: 120, method: "UPI", date: "2026-08-23" }],
+  logs: [{ time: nowStr(), text: "System initialized" }]
+};
+state.slots.find(s => s.id === 1).status = "reserved";
+
+let nextUserId = maxId(state.users, "id", 1001) + 1;
+let nextBookingId = maxId(state.bookings, "id", 5000) + 1;
+let nextPaymentId = maxId(state.payments, "id", 9000) + 1;
+
+function maxId(arr, key, fallback) { return arr.length ? Math.max(...arr.map(x => x[key])) : fallback; }
+function makeSlots() {
+  const slots = [];
+  for (let i = 1; i <= 50; i++) {
+    let type = "Car";
+    if (i % 10 === 0) type = "EV"; else if (i % 5 === 0) type = "Bike";
+    slots.push({ id: i, type, status: "available", floor: "Ground Floor" });
+  }
+  return slots;
+}
+function nowStr() { return new Date().toLocaleString(); }
+function save() { localStorage.setItem("smartpark_state", JSON.stringify(state)); }
+function load() { try { const raw = localStorage.getItem("smartpark_state"); return raw ? JSON.parse(raw) : null; } catch (e) { return null; } }
+function log(text) { state.logs.unshift({ time: nowStr(), text }); state.logs = state.logs.slice(0, 40); }
+function toast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("show");
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => t.classList.remove("show"), 2200);
+}
+
+const titles = {
+  dashboard: ["Dashboard", "Welcome to Smart Parking Management System"],
+  users: ["User Management", "Register and manage parking users"],
+  slots: ["Parking Slots", "Real-time parking slot availability"],
+  bookings: ["Bookings", "Reserve your parking slot"],
+  payments: ["Payments", "Process payments and view revenue"],
+  analytics: ["Analytics", "Revenue trends and system performance"],
+  admin: ["Admin & Monitoring", "Monitor the complete smart parking system"]
+};
+
+document.querySelectorAll(".nav-item").forEach(btn => {
+  btn.addEventListener("click", () => { navigate(btn.dataset.view); document.querySelector(".sidebar").classList.remove("open"); });
+});
+const menuToggle = document.getElementById("menuToggle");
+if (menuToggle) menuToggle.addEventListener("click", () => document.querySelector(".sidebar").classList.toggle("open"));
+
+function navigate(view) {
+  document.querySelectorAll(".nav-item").forEach(b => b.classList.toggle("active", b.dataset.view === view));
+  document.getElementById("pageTitle").textContent = titles[view][0];
+  document.getElementById("pageSub").textContent = titles[view][1];
+  const map = { dashboard: renderDashboard, users: renderUsers, slots: renderSlots, bookings: renderBookings, payments: renderPayments, analytics: renderAnalytics, admin: renderAdmin };
+  document.getElementById("viewContent").innerHTML = map[view]();
+  attachHandlers(view);
+}
+
+function statCard(icon, bg, label, value) {
+  return `<div class="stat"><div class="icon" style="background:${bg}22;color:${bg}">${icon}</div>
+    <div><div class="label">${label}</div><div class="value">${value}</div></div></div>`;
+}
+
+function renderDashboard() {
+  const revenue = state.payments.reduce((s, p) => s + p.amount, 0);
+  const occupied = state.slots.filter(s => s.status !== "available").length;
+  return `
+    <div class="card"><h2>Overview</h2><p class="desc">Live snapshot of your parking system</p>
+      <div class="stat-grid">
+        ${statCard("👤", "#2f6fed", "Users", state.users.length)}
+        ${statCard("🅿️", "#2f6fed", "Parking Slots", state.slots.length)}
+        ${statCard("📅", "#22a35a", "Bookings", state.bookings.length)}
+        ${statCard("💰", "#f6a623", "Revenue", "₹" + revenue)}
+        ${statCard("🚦", "#e0463f", "Occupied/Reserved", occupied + " / " + state.slots.length)}
+      </div></div>
+    <div class="card"><h2>Recent Activity</h2>
+      <div class="log-list">${state.logs.slice(0, 8).map(l => `<div class="log-item"><span class="time">${l.time}</span>${escapeHtml(l.text)}</div>`).join("")}</div>
+    </div>`;
+}
+
+function renderUsers() {
+  return `
+    <div class="card"><h2>User Management</h2><p class="desc">Register and manage parking users</p>
+      <form id="userForm"><div class="form-grid">
+        <div class="field"><label for="uName">Full Name</label><input required id="uName" placeholder="Enter full name"></div>
+        <div class="field"><label for="uPhone">Phone Number</label><input required id="uPhone" placeholder="Enter phone number"></div>
+        <div class="field"><label for="uEmail">Email</label><input required type="email" id="uEmail" placeholder="Enter email"></div>
+        <div class="field"><label for="uPass">Password</label><input required type="password" id="uPass" placeholder="Create password"></div>
+      </div><button class="btn" type="submit">Register User</button></form></div>
+    <div class="card"><h2>Registered Users</h2><div class="table-wrap"><table>
+      <thead><tr><th>User ID</th><th>Name</th><th>Phone</th><th>Email</th><th>Status</th></tr></thead>
+      <tbody>${state.users.map(u => `<tr><td>${u.id}</td><td>${escapeHtml(u.name)}</td><td>${escapeHtml(u.phone)}</td><td>${escapeHtml(u.email)}</td><td><span class="badge active">${u.status}</span></td></tr>`).join("")}</tbody>
+    </table></div></div>`;
+}
+
+function renderSlots() {
+  return `
+    <div class="card"><h2>Parking Slot Management</h2><p class="desc">${state.slots[0].floor} · click a slot to cycle its status</p>
+      <div class="legend"><span><i class="dot available"></i> Available</span><span><i class="dot reserved"></i> Reserved</span><span><i class="dot occupied"></i> Occupied</span></div>
+      <div class="slot-grid">${state.slots.map(s => `<button type="button" class="slot ${s.status}" data-slot="${s.id}">${s.id}<div class="type">${s.type}</div></button>`).join("")}</div>
+    </div>`;
+}
+
+function renderBookings() {
+  const userOptions = state.users.map(u => `<option value="${u.id}">${escapeHtml(u.name)}</option>`).join("");
+  const typeOptions = VEHICLE_TYPES.map(t => `<option value="${t}">${t}</option>`).join("");
+  return `
+    <div class="card"><h2>Booking &amp; Reservation</h2><p class="desc">Reserve your parking slot — best available slot is auto-allocated</p>
+      <form id="bookingForm"><div class="form-grid">
+        <div class="field"><label for="bUser">User</label><select id="bUser">${userOptions}</select></div>
+        <div class="field"><label for="bVehicle">Vehicle Number</label><input required id="bVehicle" placeholder="TN01AB1234"></div>
+        <div class="field"><label for="bType">Vehicle Type</label><select id="bType">${typeOptions}</select></div>
+        <div class="field"><label for="bDate">Date</label><input required type="date" id="bDate"></div>
+        <div class="field"><label for="bStart">Start Time</label><input required type="time" id="bStart"></div>
+        <div class="field"><label for="bEnd">End Time</label><input required type="time" id="bEnd"></div>
+      </div><button class="btn" type="submit">Find &amp; Reserve Best Slot</button></form></div>
+    <div class="card"><h2>Recent Bookings</h2><div class="table-wrap"><table>
+      <thead><tr><th>Booking ID</th><th>User</th><th>Vehicle</th><th>Slot</th><th>Date</th><th>Time</th><th>Status</th></tr></thead>
+      <tbody>${state.bookings.slice().reverse().map(b => `<tr><td>${b.id}</td><td>${escapeHtml(b.userName)}</td><td>${escapeHtml(b.vehicle)}</td><td>Slot ${b.slotId}</td><td>${b.date}</td><td>${b.start} - ${b.end}</td><td><span class="badge ${b.status.toLowerCase()}">${b.status}</span></td></tr>`).join("")}</tbody>
+    </table></div></div>`;
+}
+
+function renderPayments() {
+  const revenue = state.payments.reduce((s, p) => s + p.amount, 0);
+  return `
+    <div class="card"><h2>Payment &amp; Revenue</h2><p class="desc">Process a payment for a booking</p>
+      <div class="stat-grid" style="margin-bottom:18px;">${statCard("💰", "#22a35a", "Total Revenue", "₹" + revenue)}${statCard("🧾", "#2f6fed", "Transactions", state.payments.length)}</div>
+      <form id="payForm"><div class="form-grid">
+        <div class="field"><label for="pBooking">Booking ID</label><input required id="pBooking" placeholder="e.g. 5001"></div>
+        <div class="field"><label for="pMethod">Payment Method</label><select id="pMethod"><option>UPI</option><option>Card</option><option>Cash</option><option>Wallet</option></select></div>
+      </div><button class="btn" type="submit">Pay Now</button></form></div>
+    <div class="card"><h2>Transaction History</h2><div class="table-wrap"><table>
+      <thead><tr><th>Payment ID</th><th>Booking ID</th><th>Amount</th><th>Method</th><th>Date</th></tr></thead>
+      <tbody>${state.payments.slice().reverse().map(p => `<tr><td>${p.id}</td><td>${p.bookingId}</td><td>₹${p.amount}</td><td>${p.method}</td><td>${p.date}</td></tr>`).join("")}</tbody>
+    </table></div></div>`;
+}
+
+function renderAnalytics() {
+  const revenue = state.payments.reduce((s, p) => s + p.amount, 0);
+  const byMethod = {}; state.payments.forEach(p => byMethod[p.method] = (byMethod[p.method] || 0) + p.amount);
+  const maxMethod = Math.max(1, ...Object.values(byMethod));
+  const byType = {}; state.bookings.forEach(b => byType[b.type] = (byType[b.type] || 0) + 1);
+  const maxType = Math.max(1, ...Object.values(byType));
+  const statusCounts = { available: 0, reserved: 0, occupied: 0 };
+  state.slots.forEach(s => statusCounts[s.status]++);
+  const occupancy = Math.round(((statusCounts.reserved + statusCounts.occupied) / state.slots.length) * 100);
+
+  return `
+    <div class="two-col">
+      <div class="card"><h2>Revenue by Payment Method</h2>
+        ${Object.keys(byMethod).length ? Object.entries(byMethod).map(([m, v]) => `<div class="bar-row"><div class="bar-label">${m}</div><div class="bar-track"><div class="bar-fill" style="width:${(v/maxMethod)*100}%"></div></div><div class="bar-value">₹${v}</div></div>`).join("") : `<p class="desc">No transactions yet</p>`}
+      </div>
+      <div class="card"><h2>Bookings by Vehicle Type</h2>
+        ${Object.keys(byType).length ? Object.entries(byType).map(([t, v]) => `<div class="bar-row"><div class="bar-label">${t}</div><div class="bar-track"><div class="bar-fill" style="width:${(v/maxType)*100}%"></div></div><div class="bar-value">${v}</div></div>`).join("") : `<p class="desc">No bookings yet</p>`}
+      </div>
+    </div>
+    <div class="card"><h2>System Performance</h2><div class="stat-grid">
+      ${statCard("💰", "#22a35a", "Total Revenue", "₹" + revenue)}
+      ${statCard("📅", "#2f6fed", "Total Bookings", state.bookings.length)}
+      ${statCard("🚦", "#f6a623", "Occupancy Rate", occupancy + "%")}
+      ${statCard("🅿️", "#22a35a", "Available Slots", statusCounts.available)}
+    </div></div>`;
+}
+
+function renderAdmin() {
+  const revenue = state.payments.reduce((s, p) => s + p.amount, 0);
+  return `
+    <div class="card"><h2>Admin &amp; Monitoring</h2><p class="desc">Monitor the complete smart parking system</p>
+      <div class="stat-grid">
+        ${statCard("👤", "#2f6fed", "Users", state.users.length)}
+        ${statCard("🅿️", "#2f6fed", "Parking Slots", state.slots.length)}
+        ${statCard("📅", "#22a35a", "Bookings", state.bookings.length)}
+        ${statCard("💰", "#f6a623", "Revenue", "₹" + revenue)}
+      </div></div>
+    <div class="two-col">
+      <div class="card"><h2>System Actions</h2><p class="desc">Demo controls for admin operations</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn secondary small" id="btnBackup">Backup Data</button>
+          <button class="btn secondary small" id="btnExport">Export Report</button>
+          <button class="btn secondary small" id="btnReset">Reset System</button>
+        </div></div>
+      <div class="card"><h2>Audit Log</h2><div class="log-list">${state.logs.map(l => `<div class="log-item"><span class="time">${l.time}</span>${escapeHtml(l.text)}</div>`).join("")}</div></div>
+    </div>`;
+}
+
+function attachHandlers(view) {
+  if (view === "users") {
+    document.getElementById("userForm").addEventListener("submit", e => {
+      e.preventDefault();
+      const name = document.getElementById("uName").value.trim();
+      const phone = document.getElementById("uPhone").value.trim();
+      const email = document.getElementById("uEmail").value.trim();
+      if (!name || !phone || !email) return;
+      state.users.push({ id: nextUserId++, name, phone, email, status: "Active" });
+      log(`New user registered: ${name}`);
+      save(); toast("User registered successfully"); navigate("users");
+    });
+  }
+  if (view === "slots") {
+    document.querySelectorAll(".slot").forEach(el => {
+      el.addEventListener("click", () => {
+        const slot = state.slots.find(s => s.id == el.dataset.slot);
+        const order = ["available", "reserved", "occupied"];
+        slot.status = order[(order.indexOf(slot.status) + 1) % order.length];
+        save(); navigate("slots");
+      });
+    });
+  }
+  if (view === "bookings") {
+    document.getElementById("bookingForm").addEventListener("submit", e => {
+      e.preventDefault();
+      const userId = Number(document.getElementById("bUser").value);
+      const user = state.users.find(u => u.id === userId);
+      const vehicle = document.getElementById("bVehicle").value.trim();
+      const type = document.getElementById("bType").value;
+      const date = document.getElementById("bDate").value;
+      const start = document.getElementById("bStart").value;
+      const end = document.getElementById("bEnd").value;
+      if (!user || !vehicle || !date || !start || !end) { toast("Please fill all fields"); return; }
+      let slot = state.slots.find(s => s.status === "available" && s.type === type);
+      if (!slot) slot = state.slots.find(s => s.status === "available");
+      if (!slot) { toast("No slots available right now"); return; }
+      slot.status = "reserved";
+      const booking = { id: nextBookingId++, userId: user.id, userName: user.name, vehicle, type, date, start, end, slotId: slot.id, status: "Confirmed", paid: false };
+      state.bookings.push(booking);
+      log(`Booking #${booking.id} created for ${user.name} — Slot ${slot.id} allocated`);
+      save(); toast(`Slot ${slot.id} reserved — Booking #${booking.id}`); navigate("bookings");
+    });
+  }
+  if (view === "payments") {
+    document.getElementById("payForm").addEventListener("submit", e => {
+      e.preventDefault();
+      const bookingId = Number(document.getElementById("pBooking").value);
+      const method = document.getElementById("pMethod").value;
+      const booking = state.bookings.find(b => b.id === bookingId);
+      if (!booking) { toast("Booking ID not found"); return; }
+      if (booking.paid) { toast("This booking is already paid"); return; }
+      const hours = Math.max(1, Math.round((toMinutes(booking.end) - toMinutes(booking.start)) / 60) || 1);
+      const rate = RATE[booking.type] || 40;
+      const amount = hours * rate;
+      state.payments.push({ id: nextPaymentId++, bookingId, amount, method, date: booking.date });
+      booking.paid = true;
+      const slot = state.slots.find(s => s.id === booking.slotId);
+      if (slot) slot.status = "occupied";
+      log(`Payment of ₹${amount} received for Booking #${bookingId} via ${method}`);
+      save(); toast(`Payment of ₹${amount} successful`); navigate("payments");
+    });
+  }
+  if (view === "admin") {
+    document.getElementById("btnBackup").addEventListener("click", () => { log("System backup triggered"); save(); toast("Backup completed"); navigate("admin"); });
+    document.getElementById("btnExport").addEventListener("click", () => { log("Report exported"); toast("Report export started"); });
+    document.getElementById("btnReset").addEventListener("click", () => {
+      if (confirm("Reset all system data? This cannot be undone.")) { localStorage.removeItem("smartpark_state"); location.reload(); }
+    });
+  }
+}
+
+function toMinutes(hhmm) { if (!hhmm) return 0; const [h, m] = hhmm.split(":").map(Number); return h * 60 + m; }
+function escapeHtml(str) { return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;"); }
+
+navigate("dashboard");
